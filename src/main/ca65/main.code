@@ -1,0 +1,90 @@
+;    clock: Clock application for the Commodore 64.
+;    Copyright (C) 2022  C64PECTRE
+;
+;    This program is free software: you can redistribute it and/or modify
+;    it under the terms of the GNU General Public License as published by
+;    the Free Software Foundation, either version 3 of the License, or
+;    (at your option) any later version.
+;
+;    This program is distributed in the hope that it will be useful,
+;    but WITHOUT ANY WARRANTY; without even the implied warranty of
+;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;    GNU General Public License for more details.
+;
+;    You should have received a copy of the GNU General Public License
+;    along with this program.  If not, see https://www.gnu.org/licenses/.
+;
+;    Contact: https://github.com/c64pectre/clock/ create an issue
+
+;;; summary: main
+.proc main
+    jsr initialize
+    jsr forever
+    rts
+.endproc
+
+;;; summary: Initialize
+.proc initialize
+    jsr display_main_screen
+    rts
+.endproc
+
+;;; summary: Display main screen
+.proc display_main_screen
+    lda # CONFIG_BORDER_COLOR
+    sta VIC_EC
+    lda # CONFIG_BACKGROUND_COLOR
+    sta VIC_B0C
+    ;
+    ldaxv INIT_MAIN_SCREEN
+    jsr puts
+
+    loop:
+        ldx # 250
+    loop_do:
+        lda MAIN_SCREEN           - 1, x
+        sta SCREEN_TEXT_RAM       - 1, x
+        lda MAIN_SCREEN     + 250 - 1, x
+        sta SCREEN_TEXT_RAM + 250 - 1, x
+        lda MAIN_SCREEN     + 500 - 1, x
+        sta SCREEN_TEXT_RAM + 500 - 1, x
+        lda MAIN_SCREEN     + 750 - 1, x
+        sta SCREEN_TEXT_RAM + 750 - 1, x
+    loop_next:
+        dex
+        bne loop_do
+    loop_end:
+    ;
+    rts
+.endproc
+
+;;; summary: Put string
+;;; input:
+;;;   AX = pointer to null terminated string
+.proc puts
+    loop:
+        ldy # 0
+    loop_do:
+        lda [AX] , y
+        beq loop_end
+        jsr KERNAL_CHROUT
+    loop_next:
+        iny
+        bne loop_do
+        inc AH
+        bne loop_do
+    loop_end:
+    ;
+    rts
+.endproc
+
+.proc forever
+    loop:
+        clv
+    loop_do:
+    loop_next:
+        bvc loop_do
+    loop_end:
+    ;
+    rts
+.endproc

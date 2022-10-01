@@ -1,0 +1,53 @@
+;    clock: Clock application for the Commodore 64.
+;    Copyright (C) 2022  C64PECTRE
+;
+;    This program is free software: you can redistribute it and/or modify
+;    it under the terms of the GNU General Public License as published by
+;    the Free Software Foundation, either version 3 of the License, or
+;    (at your option) any later version.
+;
+;    This program is distributed in the hope that it will be useful,
+;    but WITHOUT ANY WARRANTY; without even the implied warranty of
+;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;    GNU General Public License for more details.
+;
+;    You should have received a copy of the GNU General Public License
+;    along with this program.  If not, see https://www.gnu.org/licenses/.
+;
+;    Contact: https://github.com/c64pectre/clock/ create an issue
+
+HDT = HOR  ; Horizontal dot
+VDT = VER  ; Vertical dot
+
+INIT_MAIN_SCREEN:
+    .byte PETSCII_ENABLE_CBM_SHIFT , PETSCII_UNSHIFTED_MODE , PETSCII_DISABLE_CBM_SHIFT , CONFIG_TEXT_COLOR , PETSCII_CLR , PETSCII_NUL
+
+MAIN_SCREEN:
+    ;                                                                   1                                                           2                                                           3
+    ;       0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9
+    ;           =====================         =====================          :          =====================         =====================
+    .byte R_F , C_I , C_L , C_E , SPC , R_V , C_I , C_E , C_W , SPC , R_S , C_E , C_T , C_T , C_I , C_N , C_G , C_S , SPC , R_H , C_E , C_L , C_P , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte  NW , HOR , LSB , R_C , C_L , C_O , C_C , C_K , RSB , LSB , R_A , C_L , C_A , C_R , C_M , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
+    .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VDT , SPC , HDT , HDT , SPC , VER
+    .byte  SW , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  SE
+    .byte SPC , LSB , R_F , R_1 , PLS , RSB , LSB , R_F , R_2 , MIN , RSB , SPC , SPC , LSB , R_F , R_3 , PLS , RSB , LSB , R_F , R_4 , MIN , RSB , SPC , SPC , LSB , R_F , R_5 , PLS , RSB , LSB , R_F , R_6 , MIN , RSB , SPC , SPC , SPC , SPC , SPC
+    .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte  NW , HOR , LSB , C_S , C_T , C_O , C_P , R_W , C_A , C_T , C_C , C_H , RSB , LSB , C_T , C_I , R_M , C_E , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
+    .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
+    .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VDT , SPC , HDT , HDT , SPC , VER
+    .byte  SW , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  SE
+    .byte SPC , LSB , C_S , R_T , C_A , C_R , C_T , DIV , C_S , C_T , C_O , R_P , RSB , SPC , LSB , R_R , C_E , C_S , C_E , C_T , RSB , SPC , LSB , R_L , C_A , C_P , RSB , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte C_C , C_O , C_P , C_Y , C_R , C_I , C_G , C_H , C_T , SPC , LPA , C_C , RPA , SPC , C_2 , C_0 , C_2 , C_2 , SPC , C_C , C_6 , C_4 , C_P , C_E , C_C , C_T , C_R , C_E , SPC , C_G , C_P , C_L , C_3 , PLS , SPC , SPC , SPC , SPC , SPC , SPC

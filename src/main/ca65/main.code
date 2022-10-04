@@ -24,10 +24,14 @@ DEBUG_CLOCK_2_Y = 23
 DEBUG_CLOCK_2_X = 28
 DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + DEBUG_CLOCK_2_X
 
+IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
+
 ;;; summary: main
 .proc main
     jsr initialize
-    jsr work
+    jsr event_loop
+    jsr finalize
+    ;
     rts
 .endproc
 
@@ -36,6 +40,13 @@ DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + D
     jsr display_main_screen
     jsr initialize_clock_1
     jsr initialize_clock_2
+    jsr set_irq_handler
+    ;
+    rts
+.endproc
+
+.proc finalize
+    jsr unset_irq_handler
     rts
 .endproc
 
@@ -89,13 +100,8 @@ DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + D
 .endproc
 
 .proc work
-    loop:
-    loop_do:
-        jsr display_debug_clock_1
-        jsr display_debug_clock_2
-    loop_next:
-        jmp loop_do
-    loop_end:
+    jsr display_debug_clock_1
+    jsr display_debug_clock_2
     ;
     rts
 .endproc
@@ -217,6 +223,69 @@ DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + D
     sta CIA_2_TOD_SEC
     lda # $04
     sta CIA_2_TOD_10THS
+    ;
+    rts
+.endproc
+
+;;; summary: Link IRQ handler
+.proc set_irq_handler
+    sei
+        ; Set IRQ at raster
+        lda # IRQ_AT_RASTER_LINE
+        sta VIC_RST
+        lda VIC_CONTROL_1
+        and # VIC_CONTROL_1_RST8_CLR
+        sta VIC_CONTROL_1
+        ; Enable raster IRQ
+        lda VIC_IE
+        ora # VIC_IE_RST_SET
+        sta VIC_IE
+        ;
+        ldwv KERNAL_CINV, irq_handler
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: Unlinq IRQ handler
+.proc unset_irq_handler
+    sei
+        ldwv KERNAL_CINV, KERNAL_INTERNAL_KEY
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: IRQ handler
+.proc irq_handler
+    ; assert I == 1
+    ;
+    if:
+        bit VIC_IR
+        bpl end
+    then:
+        ; VIC interrupt
+        ; Clear all VIC interrupts
+        lda # $FF
+        sta VIC_IR
+        ;
+       ;dec VIC_EC
+            jsr work
+       ;inc VIC_EC
+    end:
+    ;
+    jmp KERNAL_INTERNAL_KEY
+.endproc
+
+.proc event_loop
+    loop:
+    loop_do:
+        jsr KERNAL_GETIN
+        cmp # 'x'
+        beq loop_end                                        ; break
+    loop_next:
+        jmp loop_do
+    loop_end:
     ;
     rts
 .endproc

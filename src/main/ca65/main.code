@@ -16,16 +16,26 @@
 ;
 ;    Contact: https://github.com/c64pectre/clock/ create an issue
 
+DEBUG_CLOCK_1_Y = 23
+DEBUG_CLOCK_1_X = 11
+DEBUG_CLOCK_1_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_1_Y + DEBUG_CLOCK_1_X
+
+DEBUG_CLOCK_2_Y = 23
+DEBUG_CLOCK_2_X = 28
+DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + DEBUG_CLOCK_2_X
+
 ;;; summary: main
 .proc main
     jsr initialize
-    jsr forever
+    jsr work
     rts
 .endproc
 
 ;;; summary: Initialize
 .proc initialize
     jsr display_main_screen
+    jsr initialize_clock_1
+    jsr initialize_clock_2
     rts
 .endproc
 
@@ -78,13 +88,135 @@
     rts
 .endproc
 
-.proc forever
+.proc work
     loop:
-        clv
     loop_do:
+        jsr display_debug_clock_1
+        jsr display_debug_clock_2
     loop_next:
-        bvc loop_do
+        jmp loop_do
     loop_end:
+    ;
+    rts
+.endproc
+
+;;; summary: debug display TOD of CIA-1
+;;; notes:
+;;;   We must read the CIA TOD (Time Of Day) in order from hours to 10ths because
+;;;   read hour latches TOD and read 10ths releases latch.
+.proc display_debug_clock_1
+    loop:
+        ldy # 0
+        ldx # (CIA_1_TOD_HR - CIA_1_TOD_10THS)
+    loop_do:
+        lda CIA_1_TOD_10THS , x
+        pha
+            lsr
+            lsr
+            lsr
+            lsr
+            ora # %00110000                         ; $0..$f to charset '0' .. '9'
+            sta DEBUG_CLOCK_1_DISPLAY , y
+            iny
+        pla
+        and # $0f
+        ora # %00110000
+        sta DEBUG_CLOCK_1_DISPLAY , y
+        iny
+        iny
+    loop_next:
+        dex
+        bpl loop_do
+    loop_end:
+    ;
+    rts
+.endproc
+
+.proc display_debug_clock_2
+    loop:
+        ldy # 0
+        ldx # (CIA_2_TOD_HR - CIA_2_TOD_10THS)
+    loop_do:
+        lda CIA_2_TOD_10THS , x
+        pha
+            lsr
+            lsr
+            lsr
+            lsr
+            ora # %00110000
+            sta DEBUG_CLOCK_2_DISPLAY , y
+            iny
+        pla
+        and # $0f
+        ora # %00110000
+        sta DEBUG_CLOCK_2_DISPLAY , y
+        iny
+        iny
+    loop_next:
+        dex
+        bpl loop_do
+    loop_end:
+    ;
+    rts
+.endproc
+
+;;; summary: Initializa TOD of CIA-1 to 12:03:04.5 [24-hour clock] = PM 12:03:04.5 [12-hour clock]
+;;; notes:
+;;;   We must write in order from HR to 10THS, because write to HR stops the
+;;;   clock and write to 10THS starts the clock.
+.proc initialize_clock_1
+    ; Set 50/60 Hz depending on PAL/NTSC (not reliable on exotic models).
+    lda CIA_1_CRA
+    and # CIA_CRA_RTC_FREQUENCY_CLR
+    ldx KVAR_PALNTS                                 ; $00: NTSC, $01: PAL
+    if:
+        beq if_else
+    if_then:
+        ora # CIA_CRA_RTC_FREQUENCY_50HZ
+        bne if_end                                  ; bra
+    if_else:
+        ora # CIA_CRA_RTC_FREQUENCY_60HZ
+    if_end:
+    ;
+    sta CIA_1_CRA
+    ;
+    lda # ($12 | CIA_TOD_HR_AMPM_MASK_SET_PM)
+    sta CIA_1_TOD_HR
+    lda # $03
+    sta CIA_1_TOD_MIN
+    lda # $04
+    sta CIA_1_TOD_SEC
+    lda # $05
+    sta CIA_1_TOD_10THS
+    ;
+    rts
+.endproc
+
+;;; summary: Initializa TOD of CIA-2 to 23:58:59.4 [24-hour clock] = PM 11:58:59.4 [12-hour clock]
+.proc initialize_clock_2
+    ; Set 50/60 Hz depending on PAL/NTSC (not reliable on exotic models).
+    lda CIA_2_CRA
+    and # CIA_CRA_RTC_FREQUENCY_CLR
+    ldx KVAR_PALNTS                                 ; $00: NTSC, $01: PAL
+    if:
+        beq if_else
+    if_then:
+        ora # CIA_CRA_RTC_FREQUENCY_50HZ
+        bne if_end                                  ; bra
+    if_else:
+        ora # CIA_CRA_RTC_FREQUENCY_60HZ
+    if_end:
+    ;
+    sta CIA_2_CRA
+    ;
+    lda # ($11 | CIA_TOD_HR_AMPM_MASK_SET_PM)
+    sta CIA_2_TOD_HR
+    lda # $58
+    sta CIA_2_TOD_MIN
+    lda # $59
+    sta CIA_2_TOD_SEC
+    lda # $04
+    sta CIA_2_TOD_10THS
     ;
     rts
 .endproc

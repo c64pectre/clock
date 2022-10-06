@@ -26,6 +26,18 @@ DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + D
 
 IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
 
+TOD_0       = ZP_2_FIRST + 0
+TOD_0_10THS = TOD_0 + 0
+TOD_0_SEC   = TOD_0 + 1
+TOD_0_MIN   = TOD_0 + 2
+TOD_0_HR    = TOD_0 + 3
+
+TOD_1       = ZP_2_FIRST + 4
+TOD_1_10THS = TOD_1 + 0
+TOD_1_SEC   = TOD_1 + 1
+TOD_1_MIN   = TOD_1 + 2
+TOD_1_HR    = TOD_1 + 3
+
 ;;; summary: main
 .proc main
     jsr initialize
@@ -60,9 +72,9 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
     ldaxv INIT_MAIN_SCREEN
     jsr puts
 
-    loop:
+    from
         ldx # 250
-    loop_do:
+    loop
         lda MAIN_SCREEN           - 1, x
         sta SCREEN_TEXT_RAM       - 1, x
         lda MAIN_SCREEN     + 250 - 1, x
@@ -71,10 +83,10 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
         sta SCREEN_TEXT_RAM + 500 - 1, x
         lda MAIN_SCREEN     + 750 - 1, x
         sta SCREEN_TEXT_RAM + 750 - 1, x
-    loop_next:
+    next
         dex
-        bne loop_do
-    loop_end:
+        bne _loop
+    end
     ;
     rts
 .endproc
@@ -83,39 +95,45 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
 ;;; input:
 ;;;   AX = pointer to null terminated string
 .proc puts
-    loop:
+    from
         ldy # 0
-    loop_do:
+    loop
         lda [AX] , y
-        beq loop_end
+        beq _end                                            ; break
         jsr KERNAL_CHROUT
-    loop_next:
+    next
         iny
-        bne loop_do
+        bne _loop
         inc AH
-        bne loop_do
-    loop_end:
+        bne _loop
+    end
     ;
     rts
 .endproc
 
 .proc work
+    jsr read_cia_1_to_tod_0
+    lda TOD_0_HR
+    jsr tod_hr_to_h24
+    sta TOD_0_HR
     jsr display_debug_clock_1
+    ;
+    jsr read_cia_2_to_tod_1
+    lda TOD_1_HR
+    jsr tod_hr_to_h24
+    sta TOD_1_HR
     jsr display_debug_clock_2
     ;
     rts
 .endproc
 
-;;; summary: debug display TOD of CIA-1
-;;; notes:
-;;;   We must read the CIA TOD (Time Of Day) in order from hours to 10ths because
-;;;   read hour latches TOD and read 10ths releases latch.
+;;; summary: debug display TOD_0
 .proc display_debug_clock_1
-    loop:
+    from
         ldy # 0
-        ldx # (CIA_1_TOD_HR - CIA_1_TOD_10THS)
-    loop_do:
-        lda CIA_1_TOD_10THS , x
+        ldx # (CIA_TOD_HR - CIA_TOD_10THS)
+    loop
+        lda TOD_0_10THS , x
         pha
             lsr
             lsr
@@ -130,20 +148,20 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
         sta DEBUG_CLOCK_1_DISPLAY , y
         iny
         iny
-    loop_next:
+    next
         dex
-        bpl loop_do
-    loop_end:
+        bpl _loop
+    end
     ;
     rts
 .endproc
 
 .proc display_debug_clock_2
-    loop:
+    from
         ldy # 0
-        ldx # (CIA_2_TOD_HR - CIA_2_TOD_10THS)
-    loop_do:
-        lda CIA_2_TOD_10THS , x
+        ldx # (CIA_TOD_HR - CIA_TOD_10THS)
+    loop
+        lda TOD_1 , x
         pha
             lsr
             lsr
@@ -158,10 +176,10 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
         sta DEBUG_CLOCK_2_DISPLAY , y
         iny
         iny
-    loop_next:
+    next
         dex
-        bpl loop_do
-    loop_end:
+        bpl _loop
+    end
     ;
     rts
 .endproc
@@ -175,24 +193,22 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
     lda CIA_1_CRA
     and # CIA_CRA_RTC_FREQUENCY_CLR
     ldx KVAR_PALNTS                                 ; $00: NTSC, $01: PAL
-    if:
-        beq if_else
-    if_then:
+    if_ne_then
         ora # CIA_CRA_RTC_FREQUENCY_50HZ
-        bne if_end                                  ; bra
-    if_else:
+        bne _end                                  ; bra
+    else
         ora # CIA_CRA_RTC_FREQUENCY_60HZ
-    if_end:
+    end
     ;
     sta CIA_1_CRA
     ;
-    lda # ($12 | CIA_TOD_HR_AMPM_MASK_SET_PM)
+    lda # ($12 | CIA_TOD_HR_AMPM_MASK_SET_PM)               ; sets to $12 = 12 AM = 00 [24]
     sta CIA_1_TOD_HR
-    lda # $03
+    lda # $00
     sta CIA_1_TOD_MIN
-    lda # $04
+    lda # $00
     sta CIA_1_TOD_SEC
-    lda # $05
+    lda # $00
     sta CIA_1_TOD_10THS
     ;
     rts
@@ -204,24 +220,22 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
     lda CIA_2_CRA
     and # CIA_CRA_RTC_FREQUENCY_CLR
     ldx KVAR_PALNTS                                 ; $00: NTSC, $01: PAL
-    if:
-        beq if_else
-    if_then:
+    if_ne_then
         ora # CIA_CRA_RTC_FREQUENCY_50HZ
-        bne if_end                                  ; bra
-    if_else:
+        bne _end                                  ; bra
+    else
         ora # CIA_CRA_RTC_FREQUENCY_60HZ
-    if_end:
+    end
     ;
     sta CIA_2_CRA
     ;
-    lda # ($11 | CIA_TOD_HR_AMPM_MASK_SET_PM)
+    lda # $12                                               ; sets to $92 = 12 PM = 12 [24]
     sta CIA_2_TOD_HR
-    lda # $58
+    lda # $00
     sta CIA_2_TOD_MIN
-    lda # $59
+    lda # $00
     sta CIA_2_TOD_SEC
-    lda # $04
+    lda # $00
     sta CIA_2_TOD_10THS
     ;
     rts
@@ -260,10 +274,8 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
 .proc irq_handler
     ; assert I == 1
     ;
-    if:
-        bit VIC_IR
-        bpl end
-    then:
+    bit VIC_IR
+    if_mi_then
         ; VIC interrupt
         ; Clear all VIC interrupts
         lda # $FF
@@ -272,20 +284,125 @@ IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
        ;dec VIC_EC
             jsr work
        ;inc VIC_EC
-    end:
+    else_end
     ;
     jmp KERNAL_INTERNAL_KEY
 .endproc
 
 .proc event_loop
-    loop:
-    loop_do:
+    from_loop
         jsr KERNAL_GETIN
         cmp # 'x'
-        beq loop_end                                        ; break
-    loop_next:
-        jmp loop_do
-    loop_end:
+        beq _end                                            ; break
+    next
+        jmp _loop
+    end
+    ;
+    rts
+.endproc
+
+;;; summary: Read CIA-1 TOD to TOD_0
+;;; notes:
+;;;   Read CIA_i.TOD_HR latches and read CIA.TOD_10THS releases latch.
+.proc read_cia_1_to_tod_0
+    from
+        ldx # (CIA_TOD_HR - CIA_TOD_10THS)
+    loop
+        lda CIA_1_TOD_10THS , x
+        sta TOD_0_10THS , x
+    next
+        dex
+        bpl _loop
+    end
+    ;
+    ; TODO: convert H12 to H24
+    ;
+    rts
+.endproc
+
+;;; summary: Read CIA-2 TOD to TOD_1
+;;; notes:
+;;;   Read CIA_i.TOD_HR latches and read CIA.TOD_10THS releases latch.
+.proc read_cia_2_to_tod_1
+    from
+        ldx # (CIA_TOD_HR - CIA_TOD_10THS)
+    loop
+        lda CIA_2_TOD_10THS , x
+        sta TOD_1_10THS , x
+    next
+        dex
+        bpl _loop
+    end
+    ;
+    ; TODO: convert H12 to H24
+    ;
+    rts
+.endproc
+
+;;; summary: convert TOD hour (12-hour clock) to hour on 24-hour clock
+;;; input:
+;;;   A = TOD_HR
+;;; output:
+;;;   A = hour on 24 hour clock in BCD
+;;; require:
+;;;   ($01 <= A and A <= $09) or ($10 <= A and A <= $12) or ($81 <= A and A <= $89) or ($90 <= A and A <= $92)
+;;; ensure:
+;;;   ($00 <= A and A <= $09) or ($10 <= A and A <= $19) or ($20 <= A and A <= $23)
+.proc tod_hr_to_h24
+    ; check I == 1
+    cmp # $81
+    if_ge_then if_ge_81
+        ; A >= $81
+        cmp # $92
+        if_eq_then
+            lda # $12
+            bne if_ge_81::_end                              ; optimization because no code after end
+        else
+            sed
+                sec
+                sbc # $68
+            cld
+            ; check A != 0
+        end
+        ;
+        bne _end                                            ; bra
+    else
+        ; A < $81
+        cmp # $12
+        if_eq_then
+            lda # $00
+        else_end
+    end
+    ;
+    rts
+.endproc
+
+;;; summary: convert hour on 24-hour clock to TOD hour (12-hour clock)
+;;; input:
+;;;   A = hour on 24 hour clock in BCD
+;;; output:
+;;;   A = TOD_HR
+;;; require:
+;;;   ($00 <= A and A <= $09) or ($10 <= A and A <= $19) or ($20 <= A and A <= $23)
+;;; ensure:
+;;;   ($01 <= A and A <= $09) or ($10 <= A and A <= $12) or ($81 <= A and A <= $89) or ($90 <= A and A <= $92)
+.proc h24_to_tod_hr
+    ; check I == 1
+    cmp # $13
+    if_ge_then
+        ; A >= $13
+        sed
+            clc
+            adc # $68
+        cld
+        bne _end                                            ; bra
+    else
+        ; A < $13
+        cmp # $00
+        if_eq_then
+            lda # $00
+        end
+    end
     ;
     rts
 .endproc

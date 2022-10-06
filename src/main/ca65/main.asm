@@ -25,19 +25,20 @@
 .include "c64/petscii.inc"
 .include "c64/registers.inc"
 .include "macros.inc"
+.include "structured-programming.inc"
 .include "charset1.inc"
 
-.include "main.import"
+.include "main.import.a65"
 
 .include "main.inc"
 
 .segment "CODE"
-.include "main.code"
+.include "main.code.a65"
 
 .segment "RODATA"
-.include "main.rodata"
+.include "main.rodata.a65"
 
 .segment "DATA"
-.include "main.data"
+.include "main.data.a65"
 
-.include "main.export"
+.include "main.export.a65"

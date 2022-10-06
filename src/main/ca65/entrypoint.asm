@@ -16,11 +16,11 @@
 ;
 ;    Contact: https://github.com/c64pectre/clock/ create an issue
 
-.include "entrypoint.import"
+.include "entrypoint.import.a65"
 
 .include "entrypoint.inc"
 
 .segment "ENTRYPOINT"
-.include "entrypoint.code"
+.include "entrypoint.code.a65"
 
-.include "entrypoint.export"
+.include "entrypoint.export.a65"

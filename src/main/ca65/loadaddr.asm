@@ -17,6 +17,6 @@
 ;    Contact: https://github.com/c64pectre/clock/ create an issue
 
 .segment "LOADADDR"
-.include "loadaddr.code"
+.include "loadaddr.code.a65"
 
-.include "loadaddr.export"
+.include "loadaddr.export.a65"

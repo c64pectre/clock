@@ -19,7 +19,7 @@
 .include "c64/basic.inc"
 .include "exehdr.inc"
 
-.include "exehdr.import"
+.include "exehdr.import.a65"
 
 .segment "EXEHDR"
-.include "exehdr.code"
+.include "exehdr.code.a65"

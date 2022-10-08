@@ -26,9 +26,7 @@ MAIN_SCREEN:
     ;                                                                   1                                                           2                                                           3
     ;       0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9
     ;           =====================         =====================          :          =====================         =====================
-    .byte R_F , C_I , C_L , C_E , SPC , R_V , C_I , C_E , C_W , SPC , R_S , C_E , C_T , C_T , C_I , C_N , C_G , C_S , SPC , R_H , C_E , C_L , C_P , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
-    .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
-    .byte  NW , HOR , LSB , R_C , C_L , C_O , C_C , C_K , RSB , LSB , R_A , C_L , C_A , C_R , C_M , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
+    .byte  NW , HOR , LSB , R_C , C_L , C_O , C_C , C_K , RSB , LSB , R_A , C_L , C_A , C_R , C_M , RSB , HOR , LSB , R_C , C_O , C_L , C_O , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
@@ -39,7 +37,8 @@ MAIN_SCREEN:
     .byte  SW , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  SE
     .byte SPC , LSB , R_F , R_1 , PLS , RSB , LSB , R_F , R_2 , MIN , RSB , SPC , SPC , LSB , R_F , R_3 , PLS , RSB , LSB , R_F , R_4 , MIN , RSB , SPC , SPC , LSB , R_F , R_5 , PLS , RSB , LSB , R_F , R_6 , MIN , RSB , SPC , SPC , SPC , SPC , SPC
     .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
-    .byte  NW , HOR , LSB , C_S , C_T , C_O , C_P , R_W , C_A , C_T , C_C , C_H , RSB , LSB , C_T , C_I , R_M , C_E , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
+    .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte  NW , HOR , LSB , C_S , C_T , C_O , C_P , R_W , C_A , C_T , C_C , C_H , RSB , LSB , C_T , C_I , R_M , C_E , C_R , RSB , HOR , LSB , C_C , C_O , R_L , C_O , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
@@ -49,5 +48,18 @@ MAIN_SCREEN:
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VDT , SPC , HDT , HDT , SPC , VER
     .byte  SW , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  SE
     .byte SPC , LSB , C_S , R_T , C_A , C_R , C_T , DIV , C_S , C_T , C_O , R_P , RSB , SPC , LSB , R_R , C_E , C_S , C_E , C_T , RSB , SPC , LSB , R_L , C_A , C_P , RSB , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
     .byte C_D , C_E , C_B , C_U , C_G , SPC , C_C , C_I , C_A , C_1 , SPC , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , SPC , C_C , C_I , C_A , C_2 , SPC , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , SPC
     .byte C_C , C_O , C_P , C_Y , C_R , C_I , C_G , C_H , C_T , SPC , LPA , C_C , RPA , SPC , C_2 , C_0 , C_2 , C_2 , SPC , C_C , C_6 , C_4 , C_P , C_E , C_C , C_T , C_R , C_E , SPC , C_G , C_P , C_L , C_3 , PLS , SPC , C_E , R_X , C_I , C_T , SPC
+
+MAP_DISPLAY_ID_TO_START_LO:
+    ;        [0]               [1]
+    .lobytes DISPLAY_0_START , DISPLAY_1_START
+
+MAP_DISPLAY_ID_TO_START_HI:
+    ;        [0]               [1]
+    .hibytes DISPLAY_0_START , DISPLAY_1_START
+
+DISPLAY_DIGIT_INCREMENTEL_OFFSET_REVERSED:
+    ;     [0] , [1] , [2] , [3] , [4] , [5] , [6]
+    .byte 0   , 5   , 5   , 7   , 5   , 7   , 5

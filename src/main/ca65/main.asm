@@ -22,6 +22,7 @@
 .include "c64/cia-1.inc"
 .include "c64/cia-2.inc"
 .include "c64/vic.inc"
+.include "c64/colors.inc"
 .include "c64/petscii.inc"
 .include "c64/registers.inc"
 .include "macros.inc"

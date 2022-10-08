@@ -15,3 +15,7 @@
 ;    along with this program.  If not, see https://www.gnu.org/licenses/.
 ;
 ;    Contact: https://github.com/c64pectre/clock/ create an issue
+
+MAP_DISPLAY_ID_TO_LED_COLOR:
+    ;     [0]                                  [1]
+    .byte CONFIG_DISPLAY_0_DEFAULT_LED_COLOR , CONFIG_DISPLAY_1_DEFAULT_LED_COLOR

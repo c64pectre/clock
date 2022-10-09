@@ -26,11 +26,24 @@ DEBUG_CLOCK_2_DISPLAY = SCREEN_TEXT_RAM + VIC_CHAR_COLUMNS * DEBUG_CLOCK_2_Y + D
 
 IRQ_AT_RASTER_LINE = VIC_VISIBLE_SCREEN_OFFSET_Y + VIC_VISIBLE_SCREEN_SIZE_Y + 1
 
+;;; summary: TOD from/to CIA, to display; 24-hour clock
 TOD       = ZP_2_FIRST + 0
 TOD_10THS = TOD + 0
 TOD_SEC   = TOD + 1
 TOD_MIN   = TOD + 2
-TOD_HR    = TOD + 3
+TOD_HR    = TOD + 3  ; 24-hour
+
+;;; summary: Alarm TOD; 24-hour clock
+;;; notes: we keep a copy here because we can only write the alarm to the CIA
+ALARM       = ZP_2_FIRST + 4
+ALARM_10THS = ALARM + 0
+ALARM_SEC   = ALARM + 1
+ALARM_MIN   = ALARM + 2
+ALARM_HR    = ALARM + 3  ; 24-hour
+
+EVENT_LOOP_SIGNAL = ZP_4_FIRST + 0                          ; byte
+EVENT_LOOP_SIGNAL_DOWN = $00                                ; bit, bpl
+EVENT_LOOP_SIGNAL_UP   = $80                                ; bit, bmi
 
 DISPLAY_0_Y = 1
 DISPLAY_0_X = 1
@@ -401,6 +414,11 @@ DISPLAY_10THS_TRUE  = $FF
 ;;; changed: A
 .proc unset_irq_handler
     sei
+        ; Disable raster IRQ
+        lda VIC_IE
+        and # VIC_IE_RST_CLR
+        sta VIC_IE
+        ;
         ldwv KERNAL_CINV, KERNAL_INTERNAL_KEY
     cli
     ;
@@ -409,7 +427,7 @@ DISPLAY_10THS_TRUE  = $FF
 
 ;;; summary: IRQ handler
 .proc irq_handler
-    ; assert I == 1
+    ; check I == 1
     ;
     bit VIC_IR
     if_mi_then
@@ -427,13 +445,175 @@ DISPLAY_10THS_TRUE  = $FF
 .endproc
 
 .proc event_loop
-    from_loop
-        jsr KERNAL_GETIN
-        cmp # 'x'
-        beq _end                                            ; break
+    from
+        ldbv EVENT_LOOP_SIGNAL, EVENT_LOOP_SIGNAL_DOWN
+    loop
+        jsr KERNAL_GETIN                                    ; 0 = no key pressed
+        jsr find_command
+        lda # > (_next - 1)
+        pha
+        lda # < (_next - 1)
+        pha
+        lda COMMAND_HANDLER_HI , x
+        pha
+        lda COMMAND_HANDLER_LO , x
+        pha
+        php
+        rti                                                 ; jsr command handler
     next
-        jmp _loop
+        bit EVENT_LOOP_SIGNAL
+        bpl _loop
     end
+    ;
+    rts
+.endproc
+
+;;; summary: find command index from character in A, or else 0
+;;; input:
+;;;   A = Command character
+;;; output:
+;;;   X = Command index
+.proc find_command
+    from searching
+        ldx # 0
+    loop
+        cmp COMMAND_KEY_ARRAY , x
+        if_then
+            beq searching::_end                             ; break
+        else_end
+    next
+        inx
+        bne _loop                                           ; bra
+    end
+    ;
+    rts
+.endproc
+
+;;; summary: Idle (do nothing)
+.proc idle
+    rts
+.endproc
+
+;;; summary: Signal exit
+.proc exit
+    ldbv EVENT_LOOP_SIGNAL, EVENT_LOOP_SIGNAL_UP
+    rts
+.endproc
+
+;;; summary: increment clock hour by 1, wrapping on 23 to 00
+.proc hour_inc
+    sei
+        jsr read_cia_1_to_tod
+        ldx # 3
+        jsr do_inc
+        jsr write_tod_to_cia_1
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: Increment TOD part
+;;; input:
+;;;    X = part: 0 = 10THS , 1 = SEC , 2 = MIN , 3 = HR
+;;; require:
+;;;   I == 1
+.proc do_inc
+    lda TOD , x
+    cmp TOD_PART_MAX , x
+    if_eq_then
+        lda TOD_PART_MIN , x
+        beq _end                                            ; bra
+    else
+        sed
+            clc
+            adc # 1                                         ; note: inc won't work here because BCD
+        cld
+    end
+    ;
+    sta TOD , x
+    ;
+    rts
+.endproc
+
+;;; summary: decrement clock hour by 1
+.proc hour_dec
+    sei
+        jsr read_cia_1_to_tod
+        ldx # 3
+        jsr do_dec
+        jsr write_tod_to_cia_1
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: Decrement TOD part
+;;; input:
+;;;    X = part: 0 = 10THS , 1 = SEC , 2 = MIN , 3 = HR
+;;; require:
+;;;   I == 1
+.proc do_dec
+    lda TOD , x
+    cmp TOD_PART_MIN , x
+    if_eq_then
+        lda TOD_PART_MAX , x
+        beq _end                                            ; bra
+    else
+        sed
+            sec
+            sbc # 1                                         ; note: dec won't work here because BCD
+        cld
+    end
+    ;
+    sta TOD , x
+    ;
+    rts
+.endproc
+
+;;; summary: increment clock minute by 1
+.proc minute_inc
+    sei
+        jsr read_cia_1_to_tod
+        ldx # 2
+        jsr do_inc
+        jsr write_tod_to_cia_1
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: decrement clock minute by 1
+.proc minute_dec
+    sei
+        jsr read_cia_1_to_tod
+        ldx # 2
+        jsr do_dec
+        jsr write_tod_to_cia_1
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: increment clock second by 1
+.proc second_inc
+    sei
+        jsr read_cia_1_to_tod
+        ldx # 1
+        jsr do_inc
+        jsr write_tod_to_cia_1
+    cli
+    ;
+    rts
+.endproc
+
+;;; summary: decrement clock second by 1
+.proc second_dec
+    sei
+        jsr read_cia_1_to_tod
+        ldx # 1
+        jsr do_dec
+        jsr write_tod_to_cia_1
+    cli
     ;
     rts
 .endproc

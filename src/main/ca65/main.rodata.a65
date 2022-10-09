@@ -102,3 +102,41 @@ MAP_DIGIT_TO_SEGMENTS:
     .byte %00100111  ; 7
     .byte %01111111  ; 8
     .byte %01101111  ; 9
+
+TOD_PART_MAX:
+    ;     [0]   [1]               [2]               [3]
+    .byte 0   , CIA_TOD_MAX_SEC , CIA_TOD_MAX_MIN , CIA_TOD_MAX_HR_24
+
+TOD_PART_MIN:
+    ;     [0]   [1]               [2]               [3]
+    .byte 0   , CIA_TOD_MIN_SEC , CIA_TOD_MIN_MIN , CIA_TOD_MIN_HR_24
+
+COMMAND_KEY_ARRAY:
+    .byte PETSCII_F1              ; [0]
+    .byte PETSCII_F3              ; [1]
+    .byte PETSCII_F5              ; [2]
+    .byte PETSCII_F2              ; [3]
+    .byte PETSCII_F4              ; [4]
+    .byte PETSCII_F6              ; [5]
+    .byte PETSCII_LATIN_LETTER_X  ; [6]
+    .byte PETSCII_NUL             ; [7]
+
+COMMAND_HANDLER_LO:
+    .lobytes hour_inc                ; [0]
+    .lobytes minute_inc              ; [1]
+    .lobytes second_inc              ; [2]
+    .lobytes hour_dec                ; [3]
+    .lobytes minute_dec              ; [4]
+    .lobytes second_dec              ; [5]
+    .lobytes exit                    ; [6]
+    .lobytes idle                    ; [7]
+
+COMMAND_HANDLER_HI:
+    .hibytes hour_inc                ; [0]
+    .hibytes minute_inc              ; [1]
+    .hibytes second_inc              ; [2]
+    .hibytes hour_dec                ; [3]
+    .hibytes minute_dec              ; [4]
+    .hibytes second_dec              ; [5]
+    .hibytes exit                    ; [6]
+    .hibytes idle                    ; [7]

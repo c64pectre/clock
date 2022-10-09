@@ -65,6 +65,7 @@ COL =  58
 HOR =  64
 VER =  66
 DOT =  81
+CIR =  87
 SW  = 109
 NE  = 110
 NW  = 112

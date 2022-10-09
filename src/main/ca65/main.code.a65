@@ -38,7 +38,7 @@ DISPLAY_0_START = SCREEN_COLOR_RAM + DISPLAY_0_Y * VIC_CHAR_COLUMNS + DISPLAY_0_
 
 DISPLAY_1_Y = 13
 DISPLAY_1_X = 1
-DISPLAY_1_START = SCREEN_COLOR_RAM + DISPLAY_0_Y * VIC_CHAR_COLUMNS + DISPLAY_0_X
+DISPLAY_1_START = SCREEN_COLOR_RAM + DISPLAY_1_Y * VIC_CHAR_COLUMNS + DISPLAY_1_X
 
 DISPLAY_10THS_FALSE = $00
 DISPLAY_10THS_TRUE  = $FF
@@ -120,11 +120,11 @@ DISPLAY_10THS_TRUE  = $FF
 
 .proc work
     jsr read_cia_1_to_tod
-    jsr display_debug_clock_1
+   ;jsr display_debug_clock_1
     jsr display_clock
     ;
     jsr read_cia_2_to_tod
-    jsr display_debug_clock_2
+   ;jsr display_debug_clock_2
     jsr display_stopwatch
     ;
     rts
@@ -140,7 +140,7 @@ DISPLAY_10THS_TRUE  = $FF
 
 ;;; summary: Display stopwatch (TOD on bottom display)
 .proc display_stopwatch
-    ldx # 1                                                 ; display 0
+    ldx # 1                                              ; display 1
     lda DISPLAY_10THS_TRUE
     jsr display
     rts
@@ -149,7 +149,7 @@ DISPLAY_10THS_TRUE  = $FF
 ;;; summary: Display TOD on display i
 ;;; input:
 ;;;   A = Display 10ths? (==0: false, !=0: true)
-;;;   X = display ID (0 or 1)
+;;;   X = Display ID (0 or 1)
 ;;; changed: A, X, Y, AX, BX, CX, DX
 .proc display
     ; AL = display 10ths?
@@ -174,32 +174,32 @@ DISPLAY_10THS_TRUE  = $FF
     loop
         ; assert 0 <= CL && CL <= 6
         lda CL
-        if_eq_then
-            lda TOD_10THS
-            jmp _end
-        else
-            lsr
+        lsr
+        if_cc_then
             tax
             lda TOD , x
-            if_cc_then
+            sta CH
+            ldx CL
+            if_ne_then
                 lsr
                 lsr
                 lsr
                 lsr
-                jmp _end
-            else
-                and # $0f
-            end
+            else_end
+            jmp _end
+        else
+            lda CH
+            and # $0f
         end
         ;
-        lda CL
+        ldx CL
         if
             bne _then
-            lda AL
+            ldx AL
             beq _end
         then
             jsr display_digit
-        end
+        else_end
         ;
         clc
         ldx CL
@@ -217,8 +217,40 @@ DISPLAY_10THS_TRUE  = $FF
     rts
 .endproc
 
+;;; summary: Display Seven-Segment Display (SSD) digit
+;;; input:
+;;;   A  = Digit to display
+;;;   AH = Segment lit color
+;;;   BX = pointer in color RAM to top left corner of the SSD
+;;; require:
+;;;   0 <= A && A <= 9
+;;; changed: A, X, Y, DL
 .proc display_digit
-
+    ; DL = Segments
+    ;
+    tax
+    lda MAP_DIGIT_TO_SEGMENTS , x
+    sta DL
+    from
+        ldx # 6
+    loop
+        lsr DL
+        if_cs_then
+            lda AH
+            jmp _end
+        else
+            lda # CONFIG_DISPLAY_LED_DIM_COLOR
+        end
+        ;
+        ldy OFFSET_SSD_SEGMENT_1 , x
+        sta [BX] , y
+        ldy OFFSET_SSD_SEGMENT_2 , x
+        sta [BX] , y
+    next
+        dex
+        bpl _loop
+    end
+    ;
     rts
 .endproc
 
@@ -320,8 +352,9 @@ DISPLAY_10THS_TRUE  = $FF
 
 ;;; summary: Initializa TOD of CIA-1 to 00:00:00.0 [24-hour clock] = AM 12:00:00.0 [12-hour clock] and start it
 .proc initialize_clock_1
-    lda # $00
+    lda # $12
     sta TOD_HR
+    lda # $00
     sta TOD_MIN
     sta TOD_SEC
     sta TOD_10THS
@@ -564,8 +597,8 @@ DISPLAY_10THS_TRUE  = $FF
         ; A < $13
         cmp # $00
         if_eq_then
-            lda # $00
-        end
+            lda # $92
+        else_end
     end
     ;
     rts

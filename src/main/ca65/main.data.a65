@@ -16,6 +16,8 @@
 ;
 ;    Contact: https://github.com/c64pectre/clock/ create an issue
 
-MAP_DISPLAY_ID_TO_LED_COLOR:
-    ;     [0]                                  [1]
-    .byte CONFIG_DISPLAY_0_DEFAULT_LED_COLOR , CONFIG_DISPLAY_1_DEFAULT_LED_COLOR
+MAP_SELECT_ID_TO_LED_COLOR:
+    .byte CONFIG_CLOCK_DEFAULT_LED_COLOR     ; [0] SELECT_CLOCK
+    .byte CONFIG_ALARM_DEFAULT_LED_COLOR     ; [1] SELECT_ALARM
+    .byte CONFIG_STOPWATCH_DEFAULT_LED_COLOR ; [2] SELECT_STOPWATCH
+    .byte CONFIG_TIMER_DEFAULT_LED_COLOR     ; [3] SELECT_TIMER

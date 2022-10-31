@@ -18,8 +18,6 @@
 
 HDT = HOR  ; Horizontal dot
 VDT = VER  ; Vertical dot
-RBS = DOT  ; Radio Button Set
-RBC = CIR  ; Radio Button Clear
 
 INIT_MAIN_SCREEN:
     .byte PETSCII_ENABLE_CBM_SHIFT , PETSCII_UNSHIFTED_MODE , PETSCII_DISABLE_CBM_SHIFT , CONFIG_TEXT_COLOR , PETSCII_CLR , PETSCII_NUL
@@ -29,7 +27,7 @@ MAIN_SCREEN:
     ;       0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9
     ;           H_                            _H                                        M_                            _M                                        S_                            _S                            T
     ;           =====================         =====================          :          =====================         =====================          :          =====================         =====================    ,    =====================
-    .byte  NW , HOR , LSB , RBS , R_C , C_L , C_O , C_C , C_K , SPC , RBC , R_A , C_L , C_A , C_R , C_M , RSB , HOR , LSB , R_C , C_O , C_L , C_O , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
+    .byte  NW , HOR , LSB , RBS , R_C , C_L , C_O , C_C , C_K , SPC , RBC , R_A , C_L , C_A , C_R , C_M , RSB , HOR , LSB , C_C , R_O , C_L , C_O , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , SPC , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , SPC , SPC , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , SPC , SPC , VER
@@ -112,31 +110,40 @@ TOD_PART_MIN:
     .byte 0   , CIA_TOD_MIN_SEC , CIA_TOD_MIN_MIN , CIA_TOD_MIN_HR_24
 
 COMMAND_KEY_ARRAY:
-    .byte PETSCII_F1              ; [0]
-    .byte PETSCII_F3              ; [1]
-    .byte PETSCII_F5              ; [2]
-    .byte PETSCII_F2              ; [3]
-    .byte PETSCII_F4              ; [4]
-    .byte PETSCII_F6              ; [5]
-    .byte PETSCII_LATIN_LETTER_X  ; [6]
-    .byte PETSCII_NUL             ; [7]
+    .byte PETSCII_F1              ; [ 0]  hour inc
+    .byte PETSCII_F3              ; [ 1]  minute inc
+    .byte PETSCII_F5              ; [ 2]  second inc
+    .byte PETSCII_F2              ; [ 3]  hour dec
+    .byte PETSCII_F4              ; [ 4]  minute dec
+    .byte PETSCII_F6              ; [ 5]  second dec
+    .byte PETSCII_LATIN_LETTER_X  ; [ 6] exit
+    .byte PETSCII_LATIN_LETTER_C  ; [ 7] select clock
+    .byte PETSCII_LATIN_LETTER_A  ; [ 8] select alarm
+    .byte PETSCII_LATIN_LETTER_O  ; [ 9] clock alarm color
+    .byte PETSCII_NUL             ; [10]
 
 COMMAND_HANDLER_LO:
-    .lobytes hour_inc                ; [0]
-    .lobytes minute_inc              ; [1]
-    .lobytes second_inc              ; [2]
-    .lobytes hour_dec                ; [3]
-    .lobytes minute_dec              ; [4]
-    .lobytes second_dec              ; [5]
-    .lobytes exit                    ; [6]
-    .lobytes idle                    ; [7]
+    .lobytes cmd_hour_inc            ; [ 0]
+    .lobytes cmd_minute_inc          ; [ 1]
+    .lobytes cmd_second_inc          ; [ 2]
+    .lobytes cmd_hour_dec            ; [ 3]
+    .lobytes cmd_minute_dec          ; [ 4]
+    .lobytes cmd_second_dec          ; [ 5]
+    .lobytes cmd_exit                ; [ 6]
+    .lobytes cmd_select_clock        ; [ 7]
+    .lobytes cmd_select_alarm        ; [ 8]
+    .lobytes cmd_clock_alarm_color   ; [ 9]
+    .lobytes cmd_idle                ; [10]
 
 COMMAND_HANDLER_HI:
-    .hibytes hour_inc                ; [0]
-    .hibytes minute_inc              ; [1]
-    .hibytes second_inc              ; [2]
-    .hibytes hour_dec                ; [3]
-    .hibytes minute_dec              ; [4]
-    .hibytes second_dec              ; [5]
-    .hibytes exit                    ; [6]
-    .hibytes idle                    ; [7]
+    .hibytes cmd_hour_inc            ; [ 0]
+    .hibytes cmd_minute_inc          ; [ 1]
+    .hibytes cmd_second_inc          ; [ 2]
+    .hibytes cmd_hour_dec            ; [ 3]
+    .hibytes cmd_minute_dec          ; [ 4]
+    .hibytes cmd_second_dec          ; [ 5]
+    .hibytes cmd_exit                ; [ 6]
+    .hibytes cmd_select_clock        ; [ 7]
+    .hibytes cmd_select_alarm        ; [ 8]
+    .hibytes cmd_clock_alarm_color   ; [ 9]
+    .hibytes cmd_idle                ; [10]

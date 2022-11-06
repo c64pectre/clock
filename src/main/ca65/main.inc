@@ -28,3 +28,9 @@ CONFIG_DISPLAY_LED_DIM_COLOR       = COLOR_BLK
 
 RBS = DOT  ; Radio Button Set
 RBC = CIR  ; Radio Button Clear
+
+CBS = DOT  ; Check Box Set
+CBC = CIR  ; Check Box Clear
+
+FALSE = $00
+TRUE  = $FF                                                 ; so we can use bit and inc/dec

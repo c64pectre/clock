@@ -41,7 +41,7 @@ TOD_HR    = TOD + 3  ; 24-hour
 ;;; summary: Alarm TOD; 24-hour clock
 ;;; notes: we keep a copy here because we can only write the alarm to the CIA
 ALARM       = ZP_2_FIRST + 4
-ALARM_10THS = ALARM + 0
+ALARM_10THS = ALARM + 0                                     ; Not used. Write $01 due to CIA bug on $00
 ALARM_SEC   = ALARM + 1
 ALARM_MIN   = ALARM + 2
 ALARM_HR    = ALARM + 3  ; 24-hour
@@ -85,6 +85,15 @@ RB_STOPWATCH_TIMER_X = 3
 RB_STOPWATCH_TIMER_STOPWATCH_X = RB_STOPWATCH_TIMER_X + 0
 RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 
+;;; summary: Alarm is running?
+;;; notes: We keep that in variable because you cannot read CIA_ICR settings
+CB_ALARM = ZP_4_FIRST + 7                                   ; byte
+CB_ALARM_Y = 9
+CB_ALARM_X = 36
+
+;;; summary: Ring the alarm (in work)
+ALARM_RING = ZP_4_FIRST + 8                                 ; byte
+
 ;;; summary: main
 .proc main
     jsr initialize
@@ -96,6 +105,8 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 
 ;;; summary: Initialize
 .proc initialize
+    ldbv ALARM_RING, FALSE
+    jsr alarm_off
     ldbv SELECT_CLOCK_ALARM    , SELECT_CLOCK
     ldbv SELECT_STOPWATCH_TIMER, SELECT_STOPWATCH
     jsr display_main_screen
@@ -182,6 +193,11 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
         jsr display_timer
     end
     ;
+    bit ALARM_RING
+    if_mi_then
+        jsr ring_alarm
+    else_end
+    ;
     rts
 .endproc
 
@@ -197,26 +213,11 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 
 ;;; summary: Display alarm on top display
 .proc display_alarm
-    jsr ld_tod_alarm
+    jsr alarm_to_tod
     ldah MAP_SELECT_ID_TO_LED_COLOR + SELECT_ALARM
     ldx # DISPLAY_0
     lda # DISPLAY_10THS_FALSE
     jsr display
-    rts
-.endproc
-
-;;; summary: LoaD TOD from ALARM
-.proc ld_tod_alarm
-    from
-        ldx # CIA_TOD_LENGTH - 1
-    loop
-        lda ALARM - 1 , x
-        sta TOD - 1 , x
-    next
-        dex
-        bpl _loop
-    end
-    ;
     rts
 .endproc
 
@@ -522,7 +523,17 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
        ;dec VIC_EC
             jsr work
        ;inc VIC_EC
-    else_end
+       jmp _end
+    else
+        lda CIA_1_ICR                                       ; Flags will be cleared after reading the register!
+        ; We mess up CIA_1_TIMER_A!
+        if_mi_then
+            and # CIA_ICR_ALARM
+            if_ne_then
+                jsr alarm_went_off
+            else_end
+        else_end
+    end
     ;
     jmp KERNAL_INTERNAL_KEY
 .endproc
@@ -551,7 +562,7 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
     rts
 .endproc
 
-;;; summary: find command index from character in A, or else 0
+;;; summary: find command index from character in A, or else index of cmd_idle
 ;;; input:
 ;;;   A = Command character
 ;;; output:
@@ -560,6 +571,11 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
     from searching
         ldx # 0
     loop
+        ldy COMMAND_KEY_ARRAY , x
+        if_eq_then
+            beq searching::_end                             ; break
+        else_end
+        ;
         cmp COMMAND_KEY_ARRAY , x
         if_then
             beq searching::_end                             ; break
@@ -574,6 +590,8 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 
 ;;; summary: Idle (do nothing)
 .proc cmd_idle
+    ;inc VIC_EC
+    ;dec VIC_EC
     rts
 .endproc
 
@@ -586,10 +604,26 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; summary: increment clock hour by 1, wrapping on 23 to 00
 .proc cmd_hour_inc
     sei
-        jsr read_cia_1_to_tod
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr read_cia_1_to_tod
+            jmp _end
+        else
+            jsr alarm_to_tod
+        end
+        ;
         ldx # 3
         jsr do_inc
-        jsr write_tod_to_cia_1
+        ;
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr write_tod_to_cia_1
+            jmp _end
+        else
+            jsr tod_to_alarm
+        end
     cli
     ;
     rts
@@ -598,10 +632,25 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; summary: decrement clock hour by 1
 .proc cmd_hour_dec
     sei
-        jsr read_cia_1_to_tod
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr read_cia_1_to_tod
+            jmp _end
+        else
+            jsr alarm_to_tod
+        end
         ldx # 3
         jsr do_dec
-        jsr write_tod_to_cia_1
+        ;
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr write_tod_to_cia_1
+            jmp _end
+        else
+            jsr tod_to_alarm
+        end
     cli
     ;
     rts
@@ -610,10 +659,25 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; summary: increment clock minute by 1
 .proc cmd_minute_inc
     sei
-        jsr read_cia_1_to_tod
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr read_cia_1_to_tod
+            jmp _end
+        else
+            jsr alarm_to_tod
+        end
         ldx # 2
         jsr do_inc
-        jsr write_tod_to_cia_1
+        ;
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr write_tod_to_cia_1
+            jmp _end
+        else
+            jsr tod_to_alarm
+        end
     cli
     ;
     rts
@@ -622,10 +686,25 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; summary: decrement clock minute by 1
 .proc cmd_minute_dec
     sei
-        jsr read_cia_1_to_tod
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr read_cia_1_to_tod
+            jmp _end
+        else
+            jsr alarm_to_tod
+        end
         ldx # 2
         jsr do_dec
-        jsr write_tod_to_cia_1
+        ;
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr write_tod_to_cia_1
+            jmp _end
+        else
+            jsr tod_to_alarm
+        end
     cli
     ;
     rts
@@ -634,10 +713,25 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; summary: increment clock second by 1
 .proc cmd_second_inc
     sei
-        jsr read_cia_1_to_tod
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr read_cia_1_to_tod
+            jmp _end
+        else
+            jsr alarm_to_tod
+        end
         ldx # 1
         jsr do_inc
-        jsr write_tod_to_cia_1
+        ;
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr write_tod_to_cia_1
+            jmp _end
+        else
+            jsr tod_to_alarm
+        end
     cli
     ;
     rts
@@ -646,10 +740,25 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; summary: decrement clock second by 1
 .proc cmd_second_dec
     sei
-        jsr read_cia_1_to_tod
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr read_cia_1_to_tod
+            jmp _end
+        else
+            jsr alarm_to_tod
+        end
         ldx # 1
         jsr do_dec
-        jsr write_tod_to_cia_1
+        ;
+        lda SELECT_CLOCK_ALARM
+        cmp # SELECT_CLOCK
+        if_eq_then
+            jsr write_tod_to_cia_1
+            jmp _end
+        else
+            jsr tod_to_alarm
+        end
     cli
     ;
     rts
@@ -699,6 +808,66 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
     rts
 .endproc
 
+;;; summary: Toggle alarm on/off
+.proc cmd_alarm_toggle
+    bit CB_ALARM
+    if_pl_then
+        ; Alarm is off -> turn on
+        jsr alarm_on
+        jmp _end
+    else
+        ; Alarm is on -> turn off
+        jsr alarm_off
+    end
+    ;
+    rts
+.endproc
+
+;;; summary: Turn off alarm
+.proc alarm_off
+    sei
+        ldbv CB_ALARM, FALSE
+        ;
+        ldbv CIA_1_ICR, CIA_ICR_ALARM_DISABLE
+        ;
+        lda # CBC
+        sta SCREEN_TEXT_RAM + CB_ALARM_Y * VIC_CHAR_COLUMNS + CB_ALARM_X
+    cli
+    ;
+    rts
+.endproc
+
+.proc alarm_on
+    sei
+        ldbv CB_ALARM, TRUE
+        ;
+        lda CIA_1_CRB
+        and # CIA_CRB_WRITE_SELECT_TOD_CLR
+        ora # CIA_CRB_WRITE_SELECT_TOD_SELECT_ALARM
+        sta CIA_1_CRB
+        ;
+        from
+            ldx # 3
+        loop
+            lda ALARM , x
+            sta CIA_1_TOD , x
+        next
+            dex
+            bne _loop
+        end
+        ;
+        ; Set 10ths to $01 because of CIA bug may not trigger alarm on $00.
+        ldbv CIA_1_TOD_10THS, $01
+        ;
+        lda # CBS
+        sta SCREEN_TEXT_RAM + CB_ALARM_Y * VIC_CHAR_COLUMNS + CB_ALARM_X
+        ;
+        ldbv CIA_1_ICR, CIA_ICR_ALARM_ENABLE
+    cli
+    ;
+    rts
+.endproc
+
 ;;; summary: Increment TOD part
 ;;; input:
 ;;;    X = part: 0 = 10THS , 1 = SEC , 2 = MIN , 3 = HR
@@ -718,6 +887,8 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
     end
     ;
     sta TOD , x
+    ;
+    clb TOD_10THS
     ;
     rts
 .endproc
@@ -741,6 +912,8 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
     end
     ;
     sta TOD , x
+    ;
+    clb TOD_10THS
     ;
     rts
 .endproc
@@ -823,22 +996,30 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
 ;;; notes:
 ;;;   Write CIA_i.TOD_HR stops clock and write CIA.TOD_10THS starts clock.
 .proc write_tod_to_cia
-    sta AH
-    ldalv CIA_TOD_10THS
-    ;
-    lda TOD_HR
-    jsr h24_to_tod_hr
-    sta TOD_HR
-    ;
-    from
-        ldy # (CIA_TOD_HR - CIA_TOD_10THS)
-    loop
-        lda TOD , y
+    sei
+        sta AH
+        ldalv CIA_TOD_10THS
+        ;
+        lda TOD_HR
+        jsr h24_to_tod_hr
+        sta TOD_HR
+        ;
+        ldy # CIA_CRB
+        lda [AX] , y
+        and # CIA_CRB_WRITE_SELECT_TOD_CLR
+        ora # CIA_CRB_WRITE_SELECT_TOD_SELECT_CLOCK
         sta [AX] , y
-    next
-        dey
-        bpl _loop
-    end
+        ;
+        from
+            ldy # (CIA_TOD_HR - CIA_TOD_10THS)
+        loop
+            lda TOD , y
+            sta [AX] , y
+        next
+            dey
+            bpl _loop
+        end
+    cli
     ;
     rts
 .endproc
@@ -908,5 +1089,52 @@ RB_STOPWATCH_TIMER_TIMER_X     = RB_STOPWATCH_TIMER_X + 11
         else_end
     end
     ;
+    rts
+.endproc
+
+;;; summary: Copy ALARM to TOD
+.proc alarm_to_tod
+    from
+        ldx # CIA_TOD_LENGTH
+    loop
+        lda ALARM - 1 , x
+        sta TOD - 1 , x
+    next
+        dex
+        bne _loop
+    end
+    ;
+    rts
+.endproc
+
+;;; summary: Copy TOD to ALARM
+.proc tod_to_alarm
+    from
+        ldx # CIA_TOD_LENGTH
+    loop
+        lda TOD - 1 , x
+        sta ALARM - 1 , x
+    next
+        dex
+        bne _loop
+    end
+    ;
+    rts
+.endproc
+
+;;; summary: We just got an IRQ that the alarm went off: signal work to ring the alarm.
+.proc alarm_went_off
+    ; check I = 1
+    ;
+BRK1:
+    ldbv ALARM_RING, TRUE
+    ;
+    rts
+.endproc
+
+;;; summary: Ring the alarm
+;;; notes: TODO: make sound, key to stop ringing (snooze perhaps too?)
+.proc ring_alarm
+    ldbv VIC_EC, COLOR_RED
     rts
 .endproc

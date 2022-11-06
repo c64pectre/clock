@@ -27,7 +27,7 @@ MAIN_SCREEN:
     ;       0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9     0     1     2     3     4     5     6     7     8     9
     ;           H_                            _H                                        M_                            _M                                        S_                            _S                            T
     ;           =====================         =====================          :          =====================         =====================          :          =====================         =====================    ,    =====================
-    .byte  NW , HOR , LSB , RBS , R_C , C_L , C_O , C_C , C_K , SPC , RBC , R_A , C_L , C_A , C_R , C_M , RSB , HOR , LSB , C_C , R_O , C_L , C_O , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
+    .byte  NW , HOR , LSB , RBS , R_C , C_L , C_O , C_C , C_K , SPC , RBC , R_A , C_L , C_A , C_R , C_M , RSB , HOR , LSB , C_C , C_O , C_L , C_O , R_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , SPC , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , SPC , SPC , VER
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , SPC , SPC , VER
@@ -36,7 +36,7 @@ MAIN_SCREEN:
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , SPC , SPC , VER
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , SPC , VER
     .byte  SW , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  SE
-    .byte SPC , LSB , R_F , R_1 , PLS , RSB , LSB , R_F , R_2 , MIN , RSB , SPC , SPC , LSB , R_F , R_3 , PLS , RSB , LSB , R_F , R_4 , MIN , RSB , SPC , SPC , LSB , R_F , R_5 , PLS , RSB , LSB , R_F , R_6 , MIN , RSB , SPC , SPC , SPC , SPC , SPC
+    .byte SPC , LSB , R_F , R_1 , PLS , RSB , LSB , R_F , R_2 , MIN , RSB , SPC , SPC , LSB , R_F , R_3 , PLS , RSB , LSB , R_F , R_4 , MIN , RSB , SPC , SPC , LSB , R_F , R_5 , PLS , RSB , LSB , R_F , R_6 , MIN , RSB , SPC , CBC , C_A , C_L , R_M
     .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
     .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
     .byte  NW , HOR , LSB , RBS , C_S , C_T , C_O , C_P , R_W , C_A , C_T , C_C , C_H , SPC , RBC , C_T , C_I , R_M , C_E , C_R , RSB , HOR , LSB , C_C , C_O , R_L , C_O , C_R , RSB , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  NE
@@ -48,7 +48,7 @@ MAIN_SCREEN:
     .byte VER , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , SPC , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , SPC , VDT , SPC , SPC , VDT , VER
     .byte VER , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , SPC , SPC , HDT , HDT , SPC , SPC , SPC , HDT , HDT , SPC , VDT , SPC , HDT , HDT , SPC , VER
     .byte  SW , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR , HOR ,  SE
-    .byte SPC , LSB , RBS , C_S , R_T , C_A , C_R , C_T , SPC , RBC , C_S , C_T , C_O , R_P , SPC , RBC , R_R , C_E , C_S , C_E , C_T , RSB , SPC , LSB , R_L , C_A , C_P , RSB , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
+    .byte SPC , LSB , RBS , C_S , R_T , C_A , C_R , C_T , SPC , RBC , C_S , C_T , C_O , R_P , SPC , RBC , C_R , C_E , C_S , C_E , R_T , RSB , SPC , LSB , R_L , C_A , C_P , RSB , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
     .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
     .byte SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC , SPC
    ;.byte C_D , C_E , C_B , C_U , C_G , SPC , C_C , C_I , C_A , C_1 , SPC , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , SPC , C_C , C_I , C_A , C_2 , SPC , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , PER , MIN , MIN , SPC
@@ -119,8 +119,9 @@ COMMAND_KEY_ARRAY:
     .byte PETSCII_LATIN_LETTER_X  ; [ 6] exit
     .byte PETSCII_LATIN_LETTER_C  ; [ 7] select clock
     .byte PETSCII_LATIN_LETTER_A  ; [ 8] select alarm
-    .byte PETSCII_LATIN_LETTER_O  ; [ 9] clock alarm color
-    .byte PETSCII_NUL             ; [10]
+    .byte PETSCII_LATIN_LETTER_R  ; [ 9] clock alarm color
+    .byte PETSCII_LATIN_LETTER_M  ; [10] alarm on/off
+    .byte PETSCII_NUL             ; [11] end marker
 
 COMMAND_HANDLER_LO:
     .lobytes cmd_hour_inc            ; [ 0]
@@ -133,7 +134,8 @@ COMMAND_HANDLER_LO:
     .lobytes cmd_select_clock        ; [ 7]
     .lobytes cmd_select_alarm        ; [ 8]
     .lobytes cmd_clock_alarm_color   ; [ 9]
-    .lobytes cmd_idle                ; [10]
+    .lobytes cmd_alarm_toggle        ; [10]
+    .lobytes cmd_idle                ; [11]
 
 COMMAND_HANDLER_HI:
     .hibytes cmd_hour_inc            ; [ 0]
@@ -146,4 +148,5 @@ COMMAND_HANDLER_HI:
     .hibytes cmd_select_clock        ; [ 7]
     .hibytes cmd_select_alarm        ; [ 8]
     .hibytes cmd_clock_alarm_color   ; [ 9]
-    .hibytes cmd_idle                ; [10]
+    .hibytes cmd_alarm_toggle        ; [10]
+    .hibytes cmd_idle                ; [11]
